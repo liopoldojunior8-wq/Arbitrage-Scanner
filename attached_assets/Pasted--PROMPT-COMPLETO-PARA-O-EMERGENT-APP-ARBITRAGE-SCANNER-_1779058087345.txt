@@ -1,0 +1,343 @@
+# PROMPT COMPLETO PARA O EMERGENT — APP “ARBITRAGE SCANNER AI”
+
+Crie uma aplicação SaaS moderna chamada “Arbitrage Scanner AI”, focada em monitoramento de preços, oportunidades de arbitragem e alertas inteligentes entre marketplaces globais.
+
+A plataforma deve funcionar mundialmente e permitir que usuários encontrem produtos baratos em um marketplace e revendam em outro com lucro.
+
+O sistema deve ser extremamente moderno, rápido, seguro, automatizado e com design premium.
+
+---
+
+## 🎯 OBJETIVO PRINCIPAL DO APP
+
+O aplicativo deve:
+
+1. Rastrear preços de produtos automaticamente.
+2. Monitorar múltiplos marketplaces simultaneamente.
+3. Detectar oportunidades de arbitragem.
+4. Comparar preços entre plataformas.
+5. Enviar alertas automáticos via:
+
+   * WhatsApp
+   * E-mail
+   * Push Notification
+   * Telegram
+
+Exemplo:
+
+* Produto custa $20 na Amazon
+* Mesmo produto custa $45 no eBay
+* O app detecta automaticamente:
+  “Lucro potencial: $25”
+
+O sistema deve mostrar:
+
+* Margem de lucro
+* Percentual de lucro
+* Custos estimados
+* Taxas
+* ROI estimado
+* Histórico de preço
+
+---
+
+## 🌍 MARKETPLACES SUPORTADOS
+
+Integrar inicialmente:
+
+* Amazon
+* eBay
+* Walmart
+* AliExpress
+* Shopify Stores
+* Facebook Marketplace
+* Etsy
+
+Estrutura preparada para adicionar futuramente:
+
+* Mercado Livre
+* Takealot
+* OLX
+* Alibaba
+* Best Buy
+* Temu
+
+---
+
+## 🧠 IA E AUTOMAÇÃO
+
+Adicionar Inteligência Artificial para:
+
+* Detectar tendências de produtos
+* Identificar produtos “quentes”
+* Prever possíveis aumentos de preço
+* Sugerir melhores produtos para revenda
+* Filtrar oportunidades falsas
+* Calcular automaticamente lucro líquido
+
+A IA deve aprender com:
+
+* Histórico de preços
+* Comportamento do mercado
+* Frequência de vendas
+* Popularidade do produto
+
+---
+
+## 📊 FUNCIONALIDADES PRINCIPAIS
+
+### Dashboard Principal
+
+Painel moderno mostrando:
+
+* Produtos monitorados
+* Oportunidades ativas
+* Produtos mais lucrativos
+* Gráficos de preço
+* Lucro estimado
+* Histórico diário/semanal/mensal
+
+### Busca Inteligente
+
+Permitir pesquisar:
+
+* Nome do produto
+* Código SKU
+* Código ASIN
+* Categoria
+* Marca
+
+### Monitor de Preço
+
+Usuário define:
+“Me avise quando o preço cair abaixo de X”
+
+O sistema monitora 24h por dia.
+
+### Arbitragem Automática
+
+Detectar:
+
+* Comprar no Marketplace A
+* Revender no Marketplace B
+
+Mostrar:
+
+* Diferença de preço
+* Lucro bruto
+* Lucro líquido
+* Taxas estimadas
+* Frete estimado
+
+### Histórico de Preço
+
+Gráfico profissional semelhante ao Keepa.
+
+Mostrar:
+
+* Menor preço
+* Maior preço
+* Média histórica
+* Tendência de alta ou baixa
+
+### Sistema de Alertas
+
+Enviar alertas em tempo real via:
+
+* WhatsApp API
+* Gmail SMTP
+* Telegram Bot
+* Push Notifications
+
+---
+
+## 💰 SISTEMA DE MONETIZAÇÃO
+
+Criar sistema de assinatura premium.
+
+Planos:
+
+### FREE
+
+* 5 produtos monitorados
+* Alertas limitados
+* Atualização lenta
+
+### PRO
+
+* Monitoramento ilimitado
+* Alertas instantâneos
+* Arbitragem automática
+* IA avançada
+
+### VIP RESELLER
+
+* Produtos exclusivos
+* Grupo VIP
+* Alertas prioritários
+* Ranking de oportunidades
+* API privada
+
+---
+
+## 💳 FORMAS DE PAGAMENTO
+
+Integrar:
+
+Internacionais:
+
+* Stripe
+* PayPal
+* Wise
+* Apple Pay
+* Google Pay
+
+África / Moçambique:
+
+* M-Pesa
+* E-Mola
+* PaySuite
+* Visa
+* Mastercard
+
+Sistema deve:
+
+* Renovar assinaturas automaticamente
+* Gerar invoices
+* Mostrar histórico de pagamentos
+* Permitir cancelamento
+
+---
+
+## 📱 DESIGN E EXPERIÊNCIA
+
+Visual:
+
+* Dark Mode elegante
+* Interface futurista
+* Dashboard estilo fintech
+* Responsivo para:
+
+  * Mobile
+  * Tablet
+  * Desktop
+
+Inspirado em:
+
+* TradingView
+* Shopify
+* Stripe Dashboard
+
+Usar:
+
+* Framer Motion
+* TailwindCSS
+* Componentes modernos
+* Ícones minimalistas
+
+---
+
+## 🔐 SEGURANÇA
+
+Adicionar:
+
+* Login com Google
+* Login com Apple
+* Login via Email
+* Autenticação JWT
+* Criptografia de dados
+* Proteção anti-bot
+* Rate limiting
+* Sistema anti-fraude
+
+---
+
+## ⚙️ TECNOLOGIAS
+
+Frontend:
+
+* Next.js
+* React
+* TailwindCSS
+* TypeScript
+
+Backend:
+
+* Node.js
+* Express
+* Prisma ORM
+
+Banco de Dados:
+
+* PostgreSQL
+
+Infraestrutura:
+
+* Vercel
+* AWS
+* Redis Cache
+
+APIs:
+
+* Amazon API
+* eBay API
+* WhatsApp API
+* Stripe API
+* Telegram API
+
+---
+
+## 📈 FUNCIONALIDADES AVANÇADAS
+
+Adicionar:
+
+✅ Heatmap de oportunidades
+✅ Ranking de produtos mais lucrativos
+✅ Sistema de favoritos
+✅ Exportação CSV/PDF
+✅ Multi idioma
+✅ Multi moeda
+✅ Conversor automático de moeda
+✅ Sistema de afiliados
+✅ Programa de indicação
+✅ Dashboard administrativo
+✅ Logs completos
+✅ Analytics avançado
+✅ API pública para parceiros
+✅ IA para previsão de lucro
+
+---
+
+## 👨‍💼 PAINEL ADMIN
+
+O admin deve poder:
+
+* Ver usuários
+* Ver assinaturas
+* Bloquear contas
+* Aprovar pagamentos
+* Gerenciar planos
+* Monitorar APIs
+* Ver estatísticas globais
+
+---
+
+## 🚀 DIFERENCIAL DO APP
+
+O app deve parecer um software premium milionário.
+
+Foco:
+
+* Velocidade
+* Automação
+* IA
+* Escalabilidade
+* Simplicidade de uso
+
+A experiência do usuário deve ser extremamente fluida e profissional.
+
+---
+
+## 📌 OBJETIVO FINAL
+
+Criar a melhor plataforma de arbitragem e monitoramento de preços do mercado global, permitindo que usuários encontrem oportunidades lucrativas automaticamente e recebam alertas instantâneos antes da concorrência.

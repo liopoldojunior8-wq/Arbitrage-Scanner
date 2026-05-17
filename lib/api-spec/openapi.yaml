@@ -1,22 +1,33 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Arbitrage Scanner AI API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Monitored products
+  - name: opportunities
+    description: Arbitrage opportunities
+  - name: alerts
+    description: Price alerts
+  - name: marketplaces
+    description: Marketplace configurations
+  - name: dashboard
+    description: Dashboard summary data
+  - name: subscriptions
+    description: User subscription plans
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,419 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/top-opportunities:
+    get:
+      operationId: getTopOpportunities
+      tags: [dashboard]
+      summary: Get top arbitrage opportunities
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Top opportunities list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArbitrageOpportunity"
+
+  /dashboard/price-trend:
+    get:
+      operationId: getDashboardPriceTrend
+      tags: [dashboard]
+      summary: Get price trend data for dashboard chart
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: weekly
+      responses:
+        "200":
+          description: Price trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PriceTrendPoint"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List monitored products
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: marketplace
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Add a product to monitor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get product details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a monitored product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Remove a product from monitoring
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /products/{id}/price-history/{period}:
+    get:
+      operationId: getProductPriceHistory
+      tags: [products]
+      summary: Get price history for a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: period
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [week, month, quarter, year]
+      responses:
+        "200":
+          description: Price history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PriceHistoryPoint"
+
+  /products/{id}/toggle-favorite:
+    patch:
+      operationId: toggleProductFavorite
+      tags: [products]
+      summary: Toggle product favorite status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /opportunities:
+    get:
+      operationId: listOpportunities
+      tags: [opportunities]
+      summary: List arbitrage opportunities
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, expired, all]
+            default: active
+        - name: minProfit
+          in: query
+          schema:
+            type: number
+        - name: buyMarketplace
+          in: query
+          schema:
+            type: string
+        - name: sellMarketplace
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [profit, roi, profit_percent]
+            default: profit
+      responses:
+        "200":
+          description: List of arbitrage opportunities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityList"
+
+  /opportunities/{id}:
+    get:
+      operationId: getOpportunity
+      tags: [opportunities]
+      summary: Get opportunity details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Opportunity details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArbitrageOpportunity"
+        "404":
+          description: Not found
+
+  /opportunities/stats:
+    get:
+      operationId: getOpportunityStats
+      tags: [opportunities]
+      summary: Get aggregated opportunity statistics
+      responses:
+        "200":
+          description: Opportunity statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityStats"
+
+  /alerts:
+    get:
+      operationId: listAlerts
+      tags: [alerts]
+      summary: List price alerts
+      parameters:
+        - name: active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PriceAlert"
+    post:
+      operationId: createAlert
+      tags: [alerts]
+      summary: Create a price alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertInput"
+      responses:
+        "201":
+          description: Alert created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceAlert"
+
+  /alerts/{id}:
+    patch:
+      operationId: updateAlert
+      tags: [alerts]
+      summary: Update an alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertUpdate"
+      responses:
+        "200":
+          description: Updated alert
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PriceAlert"
+    delete:
+      operationId: deleteAlert
+      tags: [alerts]
+      summary: Delete an alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /marketplaces:
+    get:
+      operationId: listMarketplaces
+      tags: [marketplaces]
+      summary: List supported marketplaces
+      responses:
+        "200":
+          description: List of marketplaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Marketplace"
+
+  /subscriptions/plans:
+    get:
+      operationId: listPlans
+      tags: [subscriptions]
+      summary: Get available subscription plans
+      responses:
+        "200":
+          description: Subscription plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plan"
+
+  /subscriptions/current:
+    get:
+      operationId: getCurrentSubscription
+      tags: [subscriptions]
+      summary: Get current user subscription
+      responses:
+        "200":
+          description: Current subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +455,347 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    DashboardSummary:
+      type: object
+      required: [totalProducts, activeOpportunities, totalPotentialProfit, averageRoi, alertsFired, marketsMonitored]
+      properties:
+        totalProducts:
+          type: integer
+        activeOpportunities:
+          type: integer
+        totalPotentialProfit:
+          type: number
+        averageRoi:
+          type: number
+        alertsFired:
+          type: integer
+        marketsMonitored:
+          type: integer
+        bestOpportunityProfit:
+          type: number
+        profitChange24h:
+          type: number
+
+    PriceTrendPoint:
+      type: object
+      required: [date, avgBuyPrice, avgSellPrice, opportunities]
+      properties:
+        date:
+          type: string
+        avgBuyPrice:
+          type: number
+        avgSellPrice:
+          type: number
+        opportunities:
+          type: integer
+
+    Product:
+      type: object
+      required: [id, name, sku, marketplace, currentPrice, targetPrice, imageUrl, category, isFavorite, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sku:
+          type: string
+        asin:
+          type: ["string", "null"]
+        marketplace:
+          type: string
+        currentPrice:
+          type: number
+        targetPrice:
+          type: number
+        imageUrl:
+          type: string
+        category:
+          type: string
+        isFavorite:
+          type: boolean
+        isActive:
+          type: boolean
+        priceChange24h:
+          type: ["number", "null"]
+        priceChangePercent:
+          type: ["number", "null"]
+        lowestPrice:
+          type: ["number", "null"]
+        highestPrice:
+          type: ["number", "null"]
+        createdAt:
+          type: string
+
+    ProductList:
+      type: object
+      required: [items, total, page, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    ProductInput:
+      type: object
+      required: [name, marketplace, targetPrice, category]
+      properties:
+        name:
+          type: string
+        sku:
+          type: string
+        asin:
+          type: string
+        marketplace:
+          type: string
+        targetPrice:
+          type: number
+        imageUrl:
+          type: string
+        category:
+          type: string
+
+    ProductUpdate:
+      type: object
+      properties:
+        targetPrice:
+          type: number
+        isActive:
+          type: boolean
+        category:
+          type: string
+
+    PriceHistoryPoint:
+      type: object
+      required: [date, price, marketplace]
+      properties:
+        date:
+          type: string
+        price:
+          type: number
+        marketplace:
+          type: string
+
+    ArbitrageOpportunity:
+      type: object
+      required: [id, productName, productImage, buyMarketplace, sellMarketplace, buyPrice, sellPrice, grossProfit, netProfit, profitPercent, roi, estimatedFees, estimatedShipping, status, detectedAt]
+      properties:
+        id:
+          type: integer
+        productName:
+          type: string
+        productImage:
+          type: string
+        sku:
+          type: string
+        buyMarketplace:
+          type: string
+        sellMarketplace:
+          type: string
+        buyPrice:
+          type: number
+        sellPrice:
+          type: number
+        grossProfit:
+          type: number
+        netProfit:
+          type: number
+        profitPercent:
+          type: number
+        roi:
+          type: number
+        estimatedFees:
+          type: number
+        estimatedShipping:
+          type: number
+        status:
+          type: string
+          enum: [active, expired, captured]
+        detectedAt:
+          type: string
+        expiresAt:
+          type: ["string", "null"]
+        category:
+          type: string
+        productId:
+          type: ["integer", "null"]
+
+    OpportunityList:
+      type: object
+      required: [items, total, page, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ArbitrageOpportunity"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    OpportunityStats:
+      type: object
+      required: [totalActive, avgProfit, avgRoi, totalPotentialProfit, byBuyMarketplace, bySellMarketplace]
+      properties:
+        totalActive:
+          type: integer
+        avgProfit:
+          type: number
+        avgRoi:
+          type: number
+        totalPotentialProfit:
+          type: number
+        byBuyMarketplace:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketplaceStat"
+        bySellMarketplace:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketplaceStat"
+
+    MarketplaceStat:
+      type: object
+      required: [marketplace, count, totalProfit]
+      properties:
+        marketplace:
+          type: string
+        count:
+          type: integer
+        totalProfit:
+          type: number
+
+    PriceAlert:
+      type: object
+      required: [id, productId, productName, marketplace, targetPrice, condition, isActive, createdAt]
+      properties:
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type: string
+        marketplace:
+          type: string
+        targetPrice:
+          type: number
+        currentPrice:
+          type: ["number", "null"]
+        condition:
+          type: string
+          enum: [below, above]
+        channels:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        triggeredAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AlertInput:
+      type: object
+      required: [productId, targetPrice, condition]
+      properties:
+        productId:
+          type: integer
+        targetPrice:
+          type: number
+        condition:
+          type: string
+          enum: [below, above]
+        channels:
+          type: array
+          items:
+            type: string
+
+    AlertUpdate:
+      type: object
+      properties:
+        targetPrice:
+          type: number
+        condition:
+          type: string
+          enum: [below, above]
+        isActive:
+          type: boolean
+        channels:
+          type: array
+          items:
+            type: string
+
+    Marketplace:
+      type: object
+      required: [id, name, slug, isActive, productCount, country, currency]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        logoUrl:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        productCount:
+          type: integer
+        country:
+          type: string
+        currency:
+          type: string
+
+    Plan:
+      type: object
+      required: [id, name, slug, price, currency, interval, features, productLimit, alertLimit]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        interval:
+          type: string
+          enum: [month, year]
+        features:
+          type: array
+          items:
+            type: string
+        productLimit:
+          type: ["integer", "null"]
+        alertLimit:
+          type: ["integer", "null"]
+        isPopular:
+          type: boolean
+
+    Subscription:
+      type: object
+      required: [planId, planName, status, currentPeriodEnd]
+      properties:
+        planId:
+          type: integer
+        planName:
+          type: string
+        status:
+          type: string
+          enum: [active, cancelled, past_due, trialing]
+        currentPeriodEnd:
+          type: string
+        cancelAtPeriodEnd:
+          type: boolean
