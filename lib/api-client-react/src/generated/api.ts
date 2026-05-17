@@ -23,6 +23,8 @@ import type {
   AlertInput,
   AlertUpdate,
   ArbitrageOpportunity,
+  CalculatorInput,
+  CalculatorResult,
   DashboardSummary,
   GetDashboardPriceTrendParams,
   GetTopOpportunitiesParams,
@@ -55,6 +57,77 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
+
+export const getAnalyzeCalculatorUrl = () => {
+
+
+
+
+  return `/api/calculator/analyze`
+}
+
+/**
+ * @summary Analyze budget and return ranked opportunities with AI suggestions
+ */
+export const analyzeCalculator = async (calculatorInput: CalculatorInput, options?: RequestInit): Promise<CalculatorResult> => {
+
+  return customFetch<CalculatorResult>(getAnalyzeCalculatorUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      calculatorInput,)
+  }
+);}
+
+
+
+
+export const getAnalyzeCalculatorMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeCalculator>>, TError,{data: BodyType<CalculatorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof analyzeCalculator>>, TError,{data: BodyType<CalculatorInput>}, TContext> => {
+
+const mutationKey = ['analyzeCalculator'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeCalculator>>, {data: BodyType<CalculatorInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  analyzeCalculator(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnalyzeCalculatorMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeCalculator>>>
+    export type AnalyzeCalculatorMutationBody = BodyType<CalculatorInput>
+    export type AnalyzeCalculatorMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Analyze budget and return ranked opportunities with AI suggestions
+ */
+export const useAnalyzeCalculator = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeCalculator>>, TError,{data: BodyType<CalculatorInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof analyzeCalculator>>,
+        TError,
+        {data: BodyType<CalculatorInput>},
+        TContext
+      > => {
+      return useMutation(getAnalyzeCalculatorMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 

@@ -6,6 +6,7 @@ import opportunitiesRouter from "./opportunities";
 import alertsRouter from "./alerts";
 import marketplacesRouter from "./marketplaces";
 import subscriptionsRouter from "./subscriptions";
+import calculatorRouter from "./calculator";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(opportunitiesRouter);
 router.use(alertsRouter);
 router.use(marketplacesRouter);
 router.use(subscriptionsRouter);
+router.use(calculatorRouter);
 
 export default router;

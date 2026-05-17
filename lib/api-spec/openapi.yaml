@@ -7,6 +7,8 @@ servers:
   - url: /api
     description: Base API path
 tags:
+  - name: calculator
+    description: Profit calculator and AI suggestions
   - name: health
     description: Health operations
   - name: products
@@ -23,6 +25,25 @@ tags:
     description: User subscription plans
 
 paths:
+  /calculator/analyze:
+    post:
+      operationId: analyzeCalculator
+      tags: [calculator]
+      summary: Analyze budget and return ranked opportunities with AI suggestions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalculatorInput"
+      responses:
+        "200":
+          description: Calculator analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculatorResult"
+
   /healthz:
     get:
       operationId: healthCheck
@@ -783,6 +804,95 @@ components:
           type: ["integer", "null"]
         isPopular:
           type: boolean
+
+    CalculatorInput:
+      type: object
+      required: [budget, roiPreference]
+      properties:
+        budget:
+          type: number
+          minimum: 1
+        roiPreference:
+          type: string
+          enum: [conservative, balanced, aggressive]
+        monthlyTurns:
+          type: integer
+          default: 4
+        minProfit:
+          type: number
+          default: 0
+
+    CalculatorRankedOpportunity:
+      type: object
+      required: [id, productName, productImage, buyMarketplace, sellMarketplace, buyPrice, sellPrice, grossProfit, netProfit, roi, estimatedFees, estimatedShipping, capitalEfficiency, riskLevel, canAfford, projectedMonthlyProfit, profitPercent]
+      properties:
+        id:
+          type: integer
+        productName:
+          type: string
+        productImage:
+          type: ["string", "null"]
+        buyMarketplace:
+          type: string
+        sellMarketplace:
+          type: string
+        buyPrice:
+          type: number
+        sellPrice:
+          type: number
+        grossProfit:
+          type: number
+        netProfit:
+          type: number
+        roi:
+          type: number
+        estimatedFees:
+          type: number
+        estimatedShipping:
+          type: number
+        capitalEfficiency:
+          type: number
+        riskLevel:
+          type: string
+          enum: [low, medium, high]
+        canAfford:
+          type: boolean
+        projectedMonthlyProfit:
+          type: number
+        profitPercent:
+          type: number
+
+    CalculatorSummary:
+      type: object
+      required: [totalBudgetUsed, projectedMonthlyProfit, projectedAnnualProfit, avgRoi, avgCapitalEfficiency, bestOpportunityId, opportunitiesAffordable]
+      properties:
+        totalBudgetUsed:
+          type: number
+        projectedMonthlyProfit:
+          type: number
+        projectedAnnualProfit:
+          type: number
+        avgRoi:
+          type: number
+        avgCapitalEfficiency:
+          type: number
+        bestOpportunityId:
+          type: ["integer", "null"]
+        opportunitiesAffordable:
+          type: integer
+
+    CalculatorResult:
+      type: object
+      required: [rankedOpportunities, summary, aiSuggestion]
+      properties:
+        rankedOpportunities:
+          type: array
+          items:
+            $ref: "#/components/schemas/CalculatorRankedOpportunity"
+        summary:
+          $ref: "#/components/schemas/CalculatorSummary"
+        aiSuggestion:
+          type: string
 
     Subscription:
       type: object

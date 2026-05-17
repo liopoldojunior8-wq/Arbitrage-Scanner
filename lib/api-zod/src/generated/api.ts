@@ -9,6 +9,53 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Analyze budget and return ranked opportunities with AI suggestions
+ */
+
+export const analyzeCalculatorBodyMonthlyTurnsDefault = 4;
+export const analyzeCalculatorBodyMinProfitDefault = 0;
+
+export const AnalyzeCalculatorBody = zod.object({
+  "budget": zod.number().min(1),
+  "roiPreference": zod.enum(['conservative', 'balanced', 'aggressive']),
+  "monthlyTurns": zod.number().default(analyzeCalculatorBodyMonthlyTurnsDefault),
+  "minProfit": zod.number().default(analyzeCalculatorBodyMinProfitDefault)
+})
+
+export const AnalyzeCalculatorResponse = zod.object({
+  "rankedOpportunities": zod.array(zod.object({
+  "id": zod.number(),
+  "productName": zod.string(),
+  "productImage": zod.string().nullable(),
+  "buyMarketplace": zod.string(),
+  "sellMarketplace": zod.string(),
+  "buyPrice": zod.number(),
+  "sellPrice": zod.number(),
+  "grossProfit": zod.number(),
+  "netProfit": zod.number(),
+  "roi": zod.number(),
+  "estimatedFees": zod.number(),
+  "estimatedShipping": zod.number(),
+  "capitalEfficiency": zod.number(),
+  "riskLevel": zod.enum(['low', 'medium', 'high']),
+  "canAfford": zod.boolean(),
+  "projectedMonthlyProfit": zod.number(),
+  "profitPercent": zod.number()
+})),
+  "summary": zod.object({
+  "totalBudgetUsed": zod.number(),
+  "projectedMonthlyProfit": zod.number(),
+  "projectedAnnualProfit": zod.number(),
+  "avgRoi": zod.number(),
+  "avgCapitalEfficiency": zod.number(),
+  "bestOpportunityId": zod.number().nullable(),
+  "opportunitiesAffordable": zod.number()
+}),
+  "aiSuggestion": zod.string()
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

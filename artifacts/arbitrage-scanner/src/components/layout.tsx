@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   BarChart2,
   Box,
+  Calculator,
   CreditCard,
   Globe,
   LayoutDashboard,
@@ -22,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/opportunities", label: "Opportunities", icon: Target },
+  { href: "/calculator", label: "Profit Calculator", icon: Calculator },
   { href: "/products", label: "Products", icon: Box },
   { href: "/alerts", label: "Alerts", icon: AlertTriangle },
   { href: "/marketplaces", label: "Marketplaces", icon: Globe },

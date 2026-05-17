@@ -224,6 +224,70 @@ export interface Plan {
   isPopular?: boolean;
 }
 
+export type CalculatorInputRoiPreference = typeof CalculatorInputRoiPreference[keyof typeof CalculatorInputRoiPreference];
+
+
+export const CalculatorInputRoiPreference = {
+  conservative: 'conservative',
+  balanced: 'balanced',
+  aggressive: 'aggressive',
+} as const;
+
+export interface CalculatorInput {
+  /** @minimum 1 */
+  budget: number;
+  roiPreference: CalculatorInputRoiPreference;
+  monthlyTurns?: number;
+  minProfit?: number;
+}
+
+export type CalculatorRankedOpportunityRiskLevel = typeof CalculatorRankedOpportunityRiskLevel[keyof typeof CalculatorRankedOpportunityRiskLevel];
+
+
+export const CalculatorRankedOpportunityRiskLevel = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+} as const;
+
+export interface CalculatorRankedOpportunity {
+  id: number;
+  productName: string;
+  /** @nullable */
+  productImage: string | null;
+  buyMarketplace: string;
+  sellMarketplace: string;
+  buyPrice: number;
+  sellPrice: number;
+  grossProfit: number;
+  netProfit: number;
+  roi: number;
+  estimatedFees: number;
+  estimatedShipping: number;
+  capitalEfficiency: number;
+  riskLevel: CalculatorRankedOpportunityRiskLevel;
+  canAfford: boolean;
+  projectedMonthlyProfit: number;
+  profitPercent: number;
+}
+
+export interface CalculatorSummary {
+  totalBudgetUsed: number;
+  projectedMonthlyProfit: number;
+  projectedAnnualProfit: number;
+  avgRoi: number;
+  avgCapitalEfficiency: number;
+  /** @nullable */
+  bestOpportunityId: number | null;
+  opportunitiesAffordable: number;
+}
+
+export interface CalculatorResult {
+  rankedOpportunities: CalculatorRankedOpportunity[];
+  summary: CalculatorSummary;
+  aiSuggestion: string;
+}
+
 export type SubscriptionStatus = typeof SubscriptionStatus[keyof typeof SubscriptionStatus];
 
 
