@@ -7,6 +7,8 @@ servers:
   - url: /api
     description: Base API path
 tags:
+  - name: admin
+    description: Admin panel operations
   - name: calculator
     description: Profit calculator and AI suggestions
   - name: payment
@@ -27,6 +29,180 @@ tags:
     description: User subscription plans
 
 paths:
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Invalid password
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Admin dashboard stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserList"
+    post:
+      operationId: createAdminUser
+      tags: [admin]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserInput"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{id}:
+    put:
+      operationId: updateAdminUser
+      tags: [admin]
+      summary: Update a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+    delete:
+      operationId: deleteAdminUser
+      tags: [admin]
+      summary: Delete a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+
+  /admin/transactions:
+    get:
+      operationId: listAdminTransactions
+      tags: [admin]
+      summary: List all transactions
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTransactionList"
+    post:
+      operationId: createAdminTransaction
+      tags: [admin]
+      summary: Log a transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminTransactionInput"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTransaction"
+
+  /admin/transactions/{id}:
+    put:
+      operationId: updateAdminTransaction
+      tags: [admin]
+      summary: Update a transaction status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminTransactionUpdate"
+      responses:
+        "200":
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTransaction"
+
   /payment/info:
     get:
       operationId: getPaymentInfo
@@ -836,6 +1012,218 @@ components:
           type: ["integer", "null"]
         isPopular:
           type: boolean
+
+    AdminLoginInput:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+
+    AdminLoginResult:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    AdminStats:
+      type: object
+      required: [totalUsers, activeUsers, suspendedUsers, totalRevenue, pendingRevenue, totalTransactions, pendingTransactions, confirmedTransactions, usersByPlan]
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+        suspendedUsers:
+          type: integer
+        totalRevenue:
+          type: number
+        pendingRevenue:
+          type: number
+        totalTransactions:
+          type: integer
+        pendingTransactions:
+          type: integer
+        confirmedTransactions:
+          type: integer
+        usersByPlan:
+          type: array
+          items:
+            type: object
+            required: [planName, count]
+            properties:
+              planName:
+                type: string
+              count:
+                type: integer
+
+    AdminUser:
+      type: object
+      required: [id, email, name, phone, status, notes, createdAt]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, pending]
+        planId:
+          type: ["integer", "null"]
+        planName:
+          type: ["string", "null"]
+        premiumUntil:
+          type: ["string", "null"]
+        notes:
+          type: string
+        createdAt:
+          type: string
+
+    AdminUserInput:
+      type: object
+      required: [email, name]
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, pending]
+        planId:
+          type: ["integer", "null"]
+        premiumUntil:
+          type: ["string", "null"]
+        notes:
+          type: string
+
+    AdminUserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum: [active, suspended, pending]
+        planId:
+          type: ["integer", "null"]
+        premiumUntil:
+          type: ["string", "null"]
+        notes:
+          type: string
+
+    AdminUserList:
+      type: object
+      required: [items, total, page, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    AdminTransaction:
+      type: object
+      required: [id, userEmail, userName, amount, currency, method, status, planName, reference, notes, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["integer", "null"]
+        userEmail:
+          type: string
+        userName:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+          enum: [paypal, mpesa, bank]
+        status:
+          type: string
+          enum: [pending, confirmed, rejected]
+        planId:
+          type: ["integer", "null"]
+        planName:
+          type: string
+        reference:
+          type: string
+        notes:
+          type: string
+        confirmedAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AdminTransactionInput:
+      type: object
+      required: [amount, method, planName]
+      properties:
+        userId:
+          type: ["integer", "null"]
+        userEmail:
+          type: string
+        userName:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+          enum: [paypal, mpesa, bank]
+        planId:
+          type: ["integer", "null"]
+        planName:
+          type: string
+        reference:
+          type: string
+        notes:
+          type: string
+
+    AdminTransactionUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, rejected]
+        reference:
+          type: string
+        notes:
+          type: string
+
+    AdminTransactionList:
+      type: object
+      required: [items, total, page, limit]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminTransaction"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
 
     PaymentInfo:
       type: object

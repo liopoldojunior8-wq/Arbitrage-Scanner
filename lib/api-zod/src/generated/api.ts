@@ -9,6 +9,204 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Admin login
+ */
+export const AdminLoginBody = zod.object({
+  "password": zod.string()
+})
+
+export const AdminLoginResponse = zod.object({
+  "token": zod.string()
+})
+
+
+/**
+ * @summary Admin dashboard stats
+ */
+export const GetAdminStatsResponse = zod.object({
+  "totalUsers": zod.number(),
+  "activeUsers": zod.number(),
+  "suspendedUsers": zod.number(),
+  "totalRevenue": zod.number(),
+  "pendingRevenue": zod.number(),
+  "totalTransactions": zod.number(),
+  "pendingTransactions": zod.number(),
+  "confirmedTransactions": zod.number(),
+  "usersByPlan": zod.array(zod.object({
+  "planName": zod.string(),
+  "count": zod.number()
+}))
+})
+
+
+/**
+ * @summary List all users
+ */
+export const listAdminUsersQueryPageDefault = 1;
+export const listAdminUsersQueryLimitDefault = 20;
+
+export const ListAdminUsersQueryParams = zod.object({
+  "page": zod.coerce.number().default(listAdminUsersQueryPageDefault),
+  "limit": zod.coerce.number().default(listAdminUsersQueryLimitDefault),
+  "status": zod.coerce.string().optional()
+})
+
+export const ListAdminUsersResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "status": zod.enum(['active', 'suspended', 'pending']),
+  "planId": zod.number().nullish(),
+  "planName": zod.string().nullish(),
+  "premiumUntil": zod.string().nullish(),
+  "notes": zod.string(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Create a user
+ */
+export const CreateAdminUserBody = zod.object({
+  "email": zod.string(),
+  "name": zod.string(),
+  "phone": zod.string().optional(),
+  "status": zod.enum(['active', 'suspended', 'pending']).optional(),
+  "planId": zod.number().nullish(),
+  "premiumUntil": zod.string().nullish(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a user
+ */
+export const UpdateAdminUserParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAdminUserBody = zod.object({
+  "email": zod.string().optional(),
+  "name": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "status": zod.enum(['active', 'suspended', 'pending']).optional(),
+  "planId": zod.number().nullish(),
+  "premiumUntil": zod.string().nullish(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateAdminUserResponse = zod.object({
+  "id": zod.number(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "status": zod.enum(['active', 'suspended', 'pending']),
+  "planId": zod.number().nullish(),
+  "planName": zod.string().nullish(),
+  "premiumUntil": zod.string().nullish(),
+  "notes": zod.string(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a user
+ */
+export const DeleteAdminUserParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary List all transactions
+ */
+export const listAdminTransactionsQueryPageDefault = 1;
+export const listAdminTransactionsQueryLimitDefault = 20;
+
+export const ListAdminTransactionsQueryParams = zod.object({
+  "page": zod.coerce.number().default(listAdminTransactionsQueryPageDefault),
+  "limit": zod.coerce.number().default(listAdminTransactionsQueryLimitDefault),
+  "status": zod.coerce.string().optional()
+})
+
+export const ListAdminTransactionsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "userEmail": zod.string(),
+  "userName": zod.string(),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "method": zod.enum(['paypal', 'mpesa', 'bank']),
+  "status": zod.enum(['pending', 'confirmed', 'rejected']),
+  "planId": zod.number().nullish(),
+  "planName": zod.string(),
+  "reference": zod.string(),
+  "notes": zod.string(),
+  "confirmedAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
+})
+
+
+/**
+ * @summary Log a transaction
+ */
+export const CreateAdminTransactionBody = zod.object({
+  "userId": zod.number().nullish(),
+  "userEmail": zod.string().optional(),
+  "userName": zod.string().optional(),
+  "amount": zod.number(),
+  "currency": zod.string().optional(),
+  "method": zod.enum(['paypal', 'mpesa', 'bank']),
+  "planId": zod.number().nullish(),
+  "planName": zod.string(),
+  "reference": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a transaction status
+ */
+export const UpdateAdminTransactionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAdminTransactionBody = zod.object({
+  "status": zod.enum(['pending', 'confirmed', 'rejected']).optional(),
+  "reference": zod.string().optional(),
+  "notes": zod.string().optional()
+})
+
+export const UpdateAdminTransactionResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number().nullish(),
+  "userEmail": zod.string(),
+  "userName": zod.string(),
+  "amount": zod.number(),
+  "currency": zod.string(),
+  "method": zod.enum(['paypal', 'mpesa', 'bank']),
+  "status": zod.enum(['pending', 'confirmed', 'rejected']),
+  "planId": zod.number().nullish(),
+  "planName": zod.string(),
+  "reference": zod.string(),
+  "notes": zod.string(),
+  "confirmedAt": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
  * @summary Get platform payment information
  */
 export const GetPaymentInfoResponse = zod.object({

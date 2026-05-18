@@ -224,6 +224,189 @@ export interface Plan {
   isPopular?: boolean;
 }
 
+export interface AdminLoginInput {
+  password: string;
+}
+
+export interface AdminLoginResult {
+  token: string;
+}
+
+export type AdminStatsUsersByPlanItem = {
+  planName: string;
+  count: number;
+};
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  suspendedUsers: number;
+  totalRevenue: number;
+  pendingRevenue: number;
+  totalTransactions: number;
+  pendingTransactions: number;
+  confirmedTransactions: number;
+  usersByPlan: AdminStatsUsersByPlanItem[];
+}
+
+export type AdminUserStatus = typeof AdminUserStatus[keyof typeof AdminUserStatus];
+
+
+export const AdminUserStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  pending: 'pending',
+} as const;
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  name: string;
+  phone: string;
+  status: AdminUserStatus;
+  /** @nullable */
+  planId?: number | null;
+  /** @nullable */
+  planName?: string | null;
+  /** @nullable */
+  premiumUntil?: string | null;
+  notes: string;
+  createdAt: string;
+}
+
+export type AdminUserInputStatus = typeof AdminUserInputStatus[keyof typeof AdminUserInputStatus];
+
+
+export const AdminUserInputStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  pending: 'pending',
+} as const;
+
+export interface AdminUserInput {
+  email: string;
+  name: string;
+  phone?: string;
+  status?: AdminUserInputStatus;
+  /** @nullable */
+  planId?: number | null;
+  /** @nullable */
+  premiumUntil?: string | null;
+  notes?: string;
+}
+
+export type AdminUserUpdateStatus = typeof AdminUserUpdateStatus[keyof typeof AdminUserUpdateStatus];
+
+
+export const AdminUserUpdateStatus = {
+  active: 'active',
+  suspended: 'suspended',
+  pending: 'pending',
+} as const;
+
+export interface AdminUserUpdate {
+  email?: string;
+  name?: string;
+  phone?: string;
+  status?: AdminUserUpdateStatus;
+  /** @nullable */
+  planId?: number | null;
+  /** @nullable */
+  premiumUntil?: string | null;
+  notes?: string;
+}
+
+export interface AdminUserList {
+  items: AdminUser[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export type AdminTransactionMethod = typeof AdminTransactionMethod[keyof typeof AdminTransactionMethod];
+
+
+export const AdminTransactionMethod = {
+  paypal: 'paypal',
+  mpesa: 'mpesa',
+  bank: 'bank',
+} as const;
+
+export type AdminTransactionStatus = typeof AdminTransactionStatus[keyof typeof AdminTransactionStatus];
+
+
+export const AdminTransactionStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  rejected: 'rejected',
+} as const;
+
+export interface AdminTransaction {
+  id: number;
+  /** @nullable */
+  userId?: number | null;
+  userEmail: string;
+  userName: string;
+  amount: number;
+  currency: string;
+  method: AdminTransactionMethod;
+  status: AdminTransactionStatus;
+  /** @nullable */
+  planId?: number | null;
+  planName: string;
+  reference: string;
+  notes: string;
+  /** @nullable */
+  confirmedAt?: string | null;
+  createdAt: string;
+}
+
+export type AdminTransactionInputMethod = typeof AdminTransactionInputMethod[keyof typeof AdminTransactionInputMethod];
+
+
+export const AdminTransactionInputMethod = {
+  paypal: 'paypal',
+  mpesa: 'mpesa',
+  bank: 'bank',
+} as const;
+
+export interface AdminTransactionInput {
+  /** @nullable */
+  userId?: number | null;
+  userEmail?: string;
+  userName?: string;
+  amount: number;
+  currency?: string;
+  method: AdminTransactionInputMethod;
+  /** @nullable */
+  planId?: number | null;
+  planName: string;
+  reference?: string;
+  notes?: string;
+}
+
+export type AdminTransactionUpdateStatus = typeof AdminTransactionUpdateStatus[keyof typeof AdminTransactionUpdateStatus];
+
+
+export const AdminTransactionUpdateStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  rejected: 'rejected',
+} as const;
+
+export interface AdminTransactionUpdate {
+  status?: AdminTransactionUpdateStatus;
+  reference?: string;
+  notes?: string;
+}
+
+export interface AdminTransactionList {
+  items: AdminTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface PaymentInfo {
   id: number;
   accountHolderName: string;
@@ -328,6 +511,18 @@ export interface Subscription {
   currentPeriodEnd: string;
   cancelAtPeriodEnd?: boolean;
 }
+
+export type ListAdminUsersParams = {
+page?: number;
+limit?: number;
+status?: string;
+};
+
+export type ListAdminTransactionsParams = {
+page?: number;
+limit?: number;
+status?: string;
+};
 
 export type GetTopOpportunitiesParams = {
 limit?: number;

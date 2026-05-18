@@ -16,6 +16,7 @@ import Alerts from "@/pages/alerts";
 import Marketplaces from "@/pages/marketplaces";
 import Pricing from "@/pages/pricing";
 import Calculator from "@/pages/calculator";
+import Admin from "@/pages/admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,7 @@ function Router() {
         <Route path="/marketplaces" component={Marketplaces} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/calculator" component={Calculator} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

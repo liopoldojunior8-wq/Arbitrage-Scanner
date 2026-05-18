@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Menu,
   Moon,
+  Settings2,
   Sun,
   Target,
   X,
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/alerts", label: "Alerts", icon: AlertTriangle },
   { href: "/marketplaces", label: "Marketplaces", icon: Globe },
   { href: "/pricing", label: "Pricing", icon: CreditCard },
+  { href: "/admin", label: "Admin", icon: Settings2 },
 ];
 
 function NavLink({

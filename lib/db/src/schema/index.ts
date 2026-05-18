@@ -5,3 +5,5 @@ export * from "./opportunities";
 export * from "./alerts";
 export * from "./plans";
 export * from "./payment_info";
+export * from "./users";
+export * from "./transactions";

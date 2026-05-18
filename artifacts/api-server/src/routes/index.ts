@@ -8,6 +8,7 @@ import marketplacesRouter from "./marketplaces";
 import subscriptionsRouter from "./subscriptions";
 import calculatorRouter from "./calculator";
 import paymentRouter from "./payment";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(marketplacesRouter);
 router.use(subscriptionsRouter);
 router.use(calculatorRouter);
 router.use(paymentRouter);
+router.use(adminRouter);
 
 export default router;
