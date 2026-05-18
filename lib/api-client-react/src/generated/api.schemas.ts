@@ -224,6 +224,29 @@ export interface Plan {
   isPopular?: boolean;
 }
 
+export interface PaymentInfo {
+  id: number;
+  accountHolderName: string;
+  paypalEmail: string;
+  mpesaNumber: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankRoutingNumber: string;
+  bankSwiftCode: string;
+  paymentInstructions: string;
+}
+
+export interface PaymentInfoInput {
+  accountHolderName?: string;
+  paypalEmail?: string;
+  mpesaNumber?: string;
+  bankName?: string;
+  bankAccountNumber?: string;
+  bankRoutingNumber?: string;
+  bankSwiftCode?: string;
+  paymentInstructions?: string;
+}
+
 export type CalculatorInputRoiPreference = typeof CalculatorInputRoiPreference[keyof typeof CalculatorInputRoiPreference];
 
 

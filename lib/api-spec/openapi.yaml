@@ -9,6 +9,8 @@ servers:
 tags:
   - name: calculator
     description: Profit calculator and AI suggestions
+  - name: payment
+    description: Payment information management
   - name: health
     description: Health operations
   - name: products
@@ -25,6 +27,36 @@ tags:
     description: User subscription plans
 
 paths:
+  /payment/info:
+    get:
+      operationId: getPaymentInfo
+      tags: [payment]
+      summary: Get platform payment information
+      responses:
+        "200":
+          description: Payment info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInfo"
+    put:
+      operationId: updatePaymentInfo
+      tags: [payment]
+      summary: Update platform payment information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInfoInput"
+      responses:
+        "200":
+          description: Updated payment info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentInfo"
+
   /calculator/analyze:
     post:
       operationId: analyzeCalculator
@@ -804,6 +836,49 @@ components:
           type: ["integer", "null"]
         isPopular:
           type: boolean
+
+    PaymentInfo:
+      type: object
+      required: [id, accountHolderName, paypalEmail, mpesaNumber, bankName, bankAccountNumber, bankRoutingNumber, bankSwiftCode, paymentInstructions]
+      properties:
+        id:
+          type: integer
+        accountHolderName:
+          type: string
+        paypalEmail:
+          type: string
+        mpesaNumber:
+          type: string
+        bankName:
+          type: string
+        bankAccountNumber:
+          type: string
+        bankRoutingNumber:
+          type: string
+        bankSwiftCode:
+          type: string
+        paymentInstructions:
+          type: string
+
+    PaymentInfoInput:
+      type: object
+      properties:
+        accountHolderName:
+          type: string
+        paypalEmail:
+          type: string
+        mpesaNumber:
+          type: string
+        bankName:
+          type: string
+        bankAccountNumber:
+          type: string
+        bankRoutingNumber:
+          type: string
+        bankSwiftCode:
+          type: string
+        paymentInstructions:
+          type: string
 
     CalculatorInput:
       type: object

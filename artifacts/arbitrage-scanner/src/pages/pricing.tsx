@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useListPlans, useGetCurrentSubscription } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { motion } from "framer-motion";
-import { CheckCircle, Crown, Zap, Shield } from "lucide-react";
+import { CheckCircle, Crown, CreditCard, Zap, Shield } from "lucide-react";
+import { PaymentModal } from "@/components/payment-modal";
 
 const PLAN_ICONS = [Zap, Shield, Crown];
 const PLAN_COLORS = ["text-primary", "text-chart-4", "text-yellow-400"];
@@ -18,6 +20,13 @@ const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } };
 export default function Pricing() {
   const { data: plans, isLoading } = useListPlans();
   const { data: subscription } = useGetCurrentSubscription();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number } | null>(null);
+
+  const handleUpgrade = (name: string, price: number) => {
+    setSelectedPlan({ name, price });
+    setModalOpen(true);
+  };
 
   return (
     <div className="space-y-8">
@@ -59,6 +68,7 @@ export default function Pricing() {
             const bg = PLAN_BG[index % PLAN_BG.length];
             const borderClass = PLAN_BORDER[index % PLAN_BORDER.length];
             const isCurrent = subscription?.planId === plan.id;
+            const isPaid = plan.price > 0;
 
             return (
               <motion.div key={plan.id} variants={item} className={plan.isPopular ? "md:-mt-4" : ""}>
@@ -102,14 +112,34 @@ export default function Pricing() {
                       ))}
                     </ul>
 
-                    <Button
-                      data-testid={`button-select-plan-${plan.id}`}
-                      className={`w-full mt-6 ${plan.isPopular ? "shadow-md" : ""}`}
-                      variant={isCurrent ? "outline" : plan.isPopular ? "default" : "outline"}
-                      disabled={isCurrent}
-                    >
-                      {isCurrent ? "Current Plan" : plan.price === 0 ? "Get Started Free" : `Upgrade to ${plan.name}`}
-                    </Button>
+                    {isCurrent ? (
+                      <Button
+                        data-testid={`button-select-plan-${plan.id}`}
+                        className="w-full mt-6"
+                        variant="outline"
+                        disabled
+                      >
+                        Current Plan
+                      </Button>
+                    ) : isPaid ? (
+                      <Button
+                        data-testid={`button-select-plan-${plan.id}`}
+                        className={`w-full mt-6 gap-2 ${plan.isPopular ? "shadow-md" : ""}`}
+                        variant={plan.isPopular ? "default" : "outline"}
+                        onClick={() => handleUpgrade(plan.name, plan.price)}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Upgrade to {plan.name}
+                      </Button>
+                    ) : (
+                      <Button
+                        data-testid={`button-select-plan-${plan.id}`}
+                        className="w-full mt-6"
+                        variant="outline"
+                      >
+                        Get Started Free
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -118,10 +148,38 @@ export default function Pricing() {
         </motion.div>
       )}
 
+      {/* Payment info callout */}
+      <div className="max-w-5xl mx-auto">
+        <div
+          className="rounded-2xl border border-border/40 bg-card/60 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors"
+          onClick={() => { setSelectedPlan(null); setModalOpen(true); }}
+        >
+          <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20 shrink-0">
+            <CreditCard className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-foreground">View Payment Details</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              PayPal · M-Pesa · Bank transfer — click to see account details and payment instructions.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0 border-border/50 text-muted-foreground">
+            View Details
+          </Button>
+        </div>
+      </div>
+
       <div className="text-center text-sm text-muted-foreground space-y-1">
         <p>All plans include a 14-day free trial. No credit card required for Free plan.</p>
-        <p>Payments processed securely via Stripe. Cancel anytime.</p>
+        <p>Payments accepted via PayPal, M-Pesa, and bank transfer. Cancel anytime.</p>
       </div>
+
+      <PaymentModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        planName={selectedPlan?.name}
+        planPrice={selectedPlan?.price}
+      />
     </div>
   );
 }

@@ -32,6 +32,8 @@ export * from './marketplace';
 export * from './marketplaceStat';
 export * from './opportunityList';
 export * from './opportunityStats';
+export * from './paymentInfo';
+export * from './paymentInfoInput';
 export * from './plan';
 export * from './planInterval';
 export * from './priceAlert';

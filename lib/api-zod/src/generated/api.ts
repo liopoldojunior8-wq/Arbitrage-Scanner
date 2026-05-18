@@ -9,6 +9,49 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get platform payment information
+ */
+export const GetPaymentInfoResponse = zod.object({
+  "id": zod.number(),
+  "accountHolderName": zod.string(),
+  "paypalEmail": zod.string(),
+  "mpesaNumber": zod.string(),
+  "bankName": zod.string(),
+  "bankAccountNumber": zod.string(),
+  "bankRoutingNumber": zod.string(),
+  "bankSwiftCode": zod.string(),
+  "paymentInstructions": zod.string()
+})
+
+
+/**
+ * @summary Update platform payment information
+ */
+export const UpdatePaymentInfoBody = zod.object({
+  "accountHolderName": zod.string().optional(),
+  "paypalEmail": zod.string().optional(),
+  "mpesaNumber": zod.string().optional(),
+  "bankName": zod.string().optional(),
+  "bankAccountNumber": zod.string().optional(),
+  "bankRoutingNumber": zod.string().optional(),
+  "bankSwiftCode": zod.string().optional(),
+  "paymentInstructions": zod.string().optional()
+})
+
+export const UpdatePaymentInfoResponse = zod.object({
+  "id": zod.number(),
+  "accountHolderName": zod.string(),
+  "paypalEmail": zod.string(),
+  "mpesaNumber": zod.string(),
+  "bankName": zod.string(),
+  "bankAccountNumber": zod.string(),
+  "bankRoutingNumber": zod.string(),
+  "bankSwiftCode": zod.string(),
+  "paymentInstructions": zod.string()
+})
+
+
+/**
  * @summary Analyze budget and return ranked opportunities with AI suggestions
  */
 
