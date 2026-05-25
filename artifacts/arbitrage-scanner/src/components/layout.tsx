@@ -10,6 +10,7 @@ import {
   CreditCard,
   Globe,
   LayoutDashboard,
+  LogOut,
   Menu,
   Moon,
   Settings2,
@@ -20,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/auth-context";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -63,13 +65,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
 
-  // Close sidebar when route changes on mobile
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+  const initials = displayName
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
 
-  // Lock scroll when mobile sidebar is open
   useEffect(() => {
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -81,6 +94,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     };
   }, [mobileOpen]);
 
+  const visibleNavItems = navItems.filter(
+    (item) => item.href !== "/admin" || isAdmin
+  );
+
   const Sidebar = (
     <aside className="flex flex-col h-full bg-card/95 backdrop-blur-xl border-r border-border/50 w-64 shrink-0">
       <div className="h-16 flex items-center px-6 border-b border-border/50 gap-2">
@@ -89,7 +106,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive =
             location === item.href ||
             (item.href !== "/" && location.startsWith(item.href));
@@ -104,7 +121,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-border/50">
+      <div className="p-4 border-t border-border/50 space-y-2">
+        {/* User info */}
+        {user && (
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/30">
+            <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-xs border border-primary/30 shrink-0">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">{displayName}</p>
+              {isAdmin && (
+                <p className="text-[10px] text-primary font-medium">Admin</p>
+              )}
+            </div>
+          </div>
+        )}
+
         <Button
           variant="ghost"
           size="sm"
@@ -118,6 +150,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
           )}
           <span className="text-sm">{theme === "dark" ? "Light mode" : "Dark mode"}</span>
         </Button>
+
+        {user && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            onClick={() => signOut()}
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="text-sm">Sign Out</span>
+          </Button>
+        )}
       </div>
     </aside>
   );
@@ -181,13 +225,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {/* Right side controls */}
           <div className="flex items-center gap-3">
             <RefreshBar />
-            <div className="h-4 w-px bg-border/50 hidden sm:block" />
-            <div className="hidden sm:flex items-center gap-2">
-              <div className="text-xs text-muted-foreground">Pro Plan</div>
-              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-xs border border-primary/30 shrink-0">
-                TR
-              </div>
-            </div>
+            {user && (
+              <>
+                <div className="h-4 w-px bg-border/50 hidden sm:block" />
+                <div className="hidden sm:flex items-center gap-2">
+                  <div className="text-xs text-muted-foreground truncate max-w-[120px]">
+                    {displayName}
+                  </div>
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-semibold text-xs border border-primary/30 shrink-0">
+                    {initials}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => signOut()}
+                    title="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </header>
 
