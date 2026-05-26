@@ -42,3 +42,6 @@ externalPort = 3000
 
 [userenv.shared]
 ADMIN_PASSWORD = "admin123"
+VITE_SUPABASE_URL = "https://hzdmomiknkfzfkewwjbu.supabase.co"
+VITE_SUPABASE_ANON_KEY = "https://hzdmomiknkfzfkewwjbu.supabase.co"
+SUPABASE_URL = "https://hzdmomiknkfzfkewwjbu.supabase.co"
