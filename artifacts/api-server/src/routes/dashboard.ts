@@ -51,7 +51,7 @@ router.get("/dashboard/summary", async (_req, res): Promise<void> => {
     alertsFired: alertsFiredCount?.count ?? 0,
     marketsMonitored: marketplaceCount?.count ?? 0,
     bestOpportunityProfit: bestOpportunity?.profit ?? 0,
-    profitChange24h: 12.4,
+    profitChange24h: 0,
   };
 
   res.json(GetDashboardSummaryResponse.parse(summary));
@@ -113,7 +113,7 @@ router.get("/dashboard/price-trend", async (req, res): Promise<void> => {
     date,
     avgBuyPrice: Math.round(vals.buy * 100) / 100,
     avgSellPrice: Math.round(vals.sell * 100) / 100,
-    opportunities: Math.floor(Math.random() * 30) + 5,
+    opportunities: vals.total,
   }));
 
   if (trendPoints.length === 0) {
@@ -123,9 +123,9 @@ router.get("/dashboard/price-trend", async (req, res): Promise<void> => {
       d.setDate(d.getDate() - i);
       fallback.push({
         date: d.toISOString().slice(0, 10),
-        avgBuyPrice: 45 + Math.random() * 20,
-        avgSellPrice: 75 + Math.random() * 25,
-        opportunities: Math.floor(Math.random() * 40) + 10,
+        avgBuyPrice: 0,
+        avgSellPrice: 0,
+        opportunities: 0,
       });
     }
     res.json(GetDashboardPriceTrendResponse.parse(fallback));

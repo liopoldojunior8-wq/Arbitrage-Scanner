@@ -21,6 +21,13 @@ import type {
   PaymentInfo,
 } from "@workspace/api-client-react";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
+import {
+  useArbitrageProducts,
+  useCreateArbitrageProduct,
+  useUpdateArbitrageProduct,
+  useDeleteArbitrageProduct,
+} from "@/hooks/use-arbitrage-products";
+import { isValidUrl, type ArbitrageProduct } from "@/lib/supabase-products";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,7 +53,9 @@ import { useListPlans } from "@workspace/api-client-react";
 import {
   Activity,
   AlertTriangle,
+  AlertCircle,
   Ban,
+  Box,
   Check,
   CheckCircle2,
   ChevronLeft,
@@ -55,15 +64,21 @@ import {
   CreditCard,
   DollarSign,
   Edit2,
+  ExternalLink,
   Eye,
   EyeOff,
+  ImageIcon,
+  Link2,
+  Link2Off,
   Loader2,
   LogOut,
+  Package,
   Plus,
   RefreshCw,
   Settings2,
   Shield,
   Trash2,
+  TrendingDown,
   TrendingUp,
   UserCheck,
   Users,
@@ -1064,6 +1079,474 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
   );
 }
 
+// ── Products Tab ──────────────────────────────────────────────────────────────
+
+const MARKETPLACES = ["Amazon", "eBay", "Walmart", "AliExpress", "Etsy", "Shopify", "Other"];
+
+interface ProductFormState {
+  product_name: string;
+  marketplace: string;
+  buy_price: string;
+  sell_price: string;
+  product_url: string;
+  image_url: string;
+}
+
+const EMPTY_PRODUCT_FORM: ProductFormState = {
+  product_name: "",
+  marketplace: "Amazon",
+  buy_price: "",
+  sell_price: "",
+  product_url: "",
+  image_url: "",
+};
+
+function ProductFormDialog({
+  open,
+  onOpenChange,
+  initial,
+  onSave,
+  saving,
+  title,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  initial: ProductFormState;
+  onSave: (form: ProductFormState) => void;
+  saving: boolean;
+  title: string;
+}) {
+  const [form, setForm] = useState<ProductFormState>(initial);
+
+  function set(k: keyof ProductFormState, v: string) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  const buy = parseFloat(form.buy_price) || 0;
+  const sell = parseFloat(form.sell_price) || 0;
+  const profit = Math.round((sell - buy) * 100) / 100;
+  const roi = buy > 0 ? Math.round(((sell - buy) / buy) * 10000) / 100 : 0;
+  const urlValid = form.product_url === "" || isValidUrl(form.product_url);
+  const canSave =
+    form.product_name.trim() &&
+    form.marketplace.trim() &&
+    buy > 0 &&
+    sell > 0 &&
+    urlValid;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg bg-card border-border/60 max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Box className="h-4 w-4 text-primary" />
+            {title}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 pt-2">
+          <F label="Product Name *">
+            <Input
+              value={form.product_name}
+              onChange={(e) => set("product_name", e.target.value)}
+              placeholder="iPhone 15 Pro Max 256GB"
+              className="bg-background/60"
+            />
+          </F>
+          <F label="Marketplace *">
+            <Select value={form.marketplace} onValueChange={(v) => set("marketplace", v)}>
+              <SelectTrigger className="bg-background/60">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MARKETPLACES.map((m) => (
+                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </F>
+          <div className="grid grid-cols-2 gap-3">
+            <F label="Buy Price (USD) *">
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.buy_price}
+                onChange={(e) => set("buy_price", e.target.value)}
+                placeholder="0.00"
+                className="bg-background/60"
+              />
+            </F>
+            <F label="Sell Price (USD) *">
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.sell_price}
+                onChange={(e) => set("sell_price", e.target.value)}
+                placeholder="0.00"
+                className="bg-background/60"
+              />
+            </F>
+          </div>
+
+          {/* Live profit preview */}
+          {buy > 0 && sell > 0 && (
+            <div className={cn(
+              "flex items-center justify-between rounded-lg px-3 py-2 border text-sm",
+              profit >= 0
+                ? "bg-green-500/10 border-green-500/30"
+                : "bg-destructive/10 border-destructive/30"
+            )}>
+              <span className="text-muted-foreground text-xs">Profit / ROI</span>
+              <span className={cn("font-bold", profit >= 0 ? "text-green-400" : "text-destructive")}>
+                {profit >= 0 ? "+" : ""}${profit.toFixed(2)} / {roi.toFixed(1)}%
+              </span>
+            </div>
+          )}
+
+          <F label="Product URL">
+            <div className="relative">
+              <Input
+                value={form.product_url}
+                onChange={(e) => set("product_url", e.target.value)}
+                placeholder="https://amazon.com/dp/..."
+                className={cn("bg-background/60 pr-8", !urlValid && "border-destructive/60")}
+              />
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                {form.product_url === "" ? null : urlValid
+                  ? <Link2 className="h-4 w-4 text-green-500" />
+                  : <Link2Off className="h-4 w-4 text-destructive" />}
+              </span>
+            </div>
+            {!urlValid && form.product_url !== "" && (
+              <p className="text-xs text-destructive mt-1">Must be a valid https:// URL</p>
+            )}
+          </F>
+
+          <F label="Image URL">
+            <div className="relative">
+              <Input
+                value={form.image_url}
+                onChange={(e) => set("image_url", e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                className="bg-background/60 pr-8"
+              />
+              <ImageIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+            </div>
+            {form.image_url && (
+              <div className="mt-2 flex items-center gap-2">
+                <div className="h-10 w-10 rounded border border-border/50 overflow-hidden bg-muted shrink-0">
+                  <img
+                    src={form.image_url}
+                    alt="preview"
+                    className="h-full w-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0.3"; }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Image preview</p>
+              </div>
+            )}
+          </F>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => onSave(form)}
+              disabled={!canSave || saving}
+              className="gap-1.5"
+            >
+              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              Save Product
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProductsTab() {
+  const [search, setSearch] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<ArbitrageProduct | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ArbitrageProduct | null>(null);
+  const [addForm, setAddForm] = useState<ProductFormState>(EMPTY_PRODUCT_FORM);
+  const [toast, setToast] = useState<{ msg: string; type: "ok" | "err" } | null>(null);
+
+  const { data: products, isLoading, error } = useArbitrageProducts();
+  const createMut = useCreateArbitrageProduct();
+  const updateMut = useUpdateArbitrageProduct();
+  const deleteMut = useDeleteArbitrageProduct();
+
+  function showToast(msg: string, type: "ok" | "err" = "ok") {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  const filtered = (products ?? []).filter(
+    (p) =>
+      !search ||
+      p.product_name.toLowerCase().includes(search.toLowerCase()) ||
+      p.marketplace.toLowerCase().includes(search.toLowerCase())
+  );
+
+  function handleAdd(form: ProductFormState) {
+    createMut.mutate(
+      {
+        product_name: form.product_name,
+        marketplace: form.marketplace,
+        buy_price: parseFloat(form.buy_price),
+        sell_price: parseFloat(form.sell_price),
+        product_url: form.product_url || null,
+        image_url: form.image_url || null,
+      },
+      {
+        onSuccess: () => {
+          setAddOpen(false);
+          setAddForm(EMPTY_PRODUCT_FORM);
+          showToast("Product added successfully");
+        },
+        onError: (e: Error) => showToast(e.message, "err"),
+      }
+    );
+  }
+
+  function handleEdit(form: ProductFormState) {
+    if (!editTarget) return;
+    updateMut.mutate(
+      {
+        id: editTarget.id,
+        input: {
+          product_name: form.product_name,
+          marketplace: form.marketplace,
+          buy_price: parseFloat(form.buy_price),
+          sell_price: parseFloat(form.sell_price),
+          product_url: form.product_url || null,
+          image_url: form.image_url || null,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditTarget(null);
+          showToast("Product updated");
+        },
+        onError: (e: Error) => showToast(e.message, "err"),
+      }
+    );
+  }
+
+  function handleDelete() {
+    if (!deleteTarget) return;
+    deleteMut.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+        showToast("Product deleted");
+      },
+      onError: (e: Error) => showToast(e.message, "err"),
+    });
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm border",
+              toast.type === "ok"
+                ? "bg-green-500/10 border-green-500/30 text-green-400"
+                : "bg-destructive/10 border-destructive/30 text-destructive"
+            )}
+          >
+            {toast.type === "ok" ? <Check className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Controls */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products..."
+            className="pl-9 bg-card/50 border-border/50 h-9 text-sm"
+          />
+        </div>
+        <Button size="sm" className="gap-1.5 shrink-0" onClick={() => { setAddForm(EMPTY_PRODUCT_FORM); setAddOpen(true); }}>
+          <Plus className="h-3.5 w-3.5" /> Add Product
+        </Button>
+      </div>
+
+      {error && (
+        <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2.5">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          Failed to load products. Check your Supabase credentials and that the <code className="font-mono text-xs mx-1">arbitrage_products</code> table exists.
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="rounded-xl border border-border/50 overflow-hidden">
+        <div className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] text-xs text-muted-foreground bg-muted/40 px-4 py-2.5 gap-4 border-b border-border/30">
+          <span>Product</span>
+          <span className="text-right">Buy</span>
+          <span className="text-right">Sell</span>
+          <span className="text-right">Profit</span>
+          <span className="text-right">ROI</span>
+          <span></span>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground">
+            <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
+            <p className="text-sm font-medium">{search ? "No products match" : "No products yet"}</p>
+            <p className="text-xs mt-1">{search ? "Try a different search." : "Click \"Add Product\" to get started."}</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border/30">
+            {filtered.map((p) => {
+              const profitable = p.profit >= 0;
+              const hasUrl = isValidUrl(p.product_url);
+              return (
+                <div key={p.id} className="grid grid-cols-[1fr_auto_auto_auto_auto_auto] items-center px-4 py-3 gap-4 hover:bg-muted/20 transition-colors group">
+                  {/* Name + marketplace */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-lg bg-muted shrink-0 overflow-hidden border border-border/30">
+                      {p.image_url ? (
+                        <img src={p.image_url} alt="" className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <Package className="h-4 w-4 text-muted-foreground/50" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-medium truncate">{p.product_name}</p>
+                        {hasUrl && (
+                          <a href={p.product_url!} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <ExternalLink className="h-3 w-3 text-muted-foreground/50 hover:text-primary transition-colors" />
+                          </a>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{p.marketplace}</p>
+                    </div>
+                  </div>
+
+                  <span className="text-sm text-right tabular-nums">${p.buy_price.toFixed(2)}</span>
+                  <span className="text-sm text-right tabular-nums">${p.sell_price.toFixed(2)}</span>
+                  <span className={cn("text-sm font-semibold text-right tabular-nums", profitable ? "text-green-400" : "text-destructive")}>
+                    {profitable ? "+" : ""}${p.profit.toFixed(2)}
+                  </span>
+                  <span className={cn("text-sm font-semibold text-right tabular-nums", profitable ? "text-green-400" : "text-destructive")}>
+                    {profitable ? "+" : ""}{p.roi.toFixed(1)}%
+                  </span>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setEditTarget(p)}
+                      className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    >
+                      <Edit2 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(p)}
+                      className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {products && products.length > 0 && (
+        <p className="text-xs text-muted-foreground text-right">
+          {filtered.length} of {products.length} product{products.length !== 1 ? "s" : ""}
+        </p>
+      )}
+
+      {/* Add dialog */}
+      <ProductFormDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        initial={addForm}
+        onSave={handleAdd}
+        saving={createMut.isPending}
+        title="Add Product"
+      />
+
+      {/* Edit dialog */}
+      <ProductFormDialog
+        open={!!editTarget}
+        onOpenChange={(v) => { if (!v) setEditTarget(null); }}
+        initial={
+          editTarget
+            ? {
+                product_name: editTarget.product_name,
+                marketplace: editTarget.marketplace,
+                buy_price: editTarget.buy_price.toString(),
+                sell_price: editTarget.sell_price.toString(),
+                product_url: editTarget.product_url ?? "",
+                image_url: editTarget.image_url ?? "",
+              }
+            : EMPTY_PRODUCT_FORM
+        }
+        onSave={handleEdit}
+        saving={updateMut.isPending}
+        title="Edit Product"
+      />
+
+      {/* Delete confirmation */}
+      <Dialog open={!!deleteTarget} onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}>
+        <DialogContent className="max-w-sm bg-card border-border/60">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-4 w-4" /> Delete Product
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to delete{" "}
+            <strong className="text-foreground">"{deleteTarget?.product_name}"</strong>? This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleteMut.isPending}
+              className="gap-1.5"
+            >
+              {deleteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ── Main Admin Page ───────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -1098,9 +1581,12 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="dashboard">
-        <TabsList className="bg-muted/60 border border-border/30 h-9">
+        <TabsList className="bg-muted/60 border border-border/30 h-9 flex-wrap">
           <TabsTrigger value="dashboard" className="text-xs gap-1.5">
             <Activity className="h-3.5 w-3.5" /> Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="products" className="text-xs gap-1.5">
+            <Box className="h-3.5 w-3.5" /> Products
           </TabsTrigger>
           <TabsTrigger value="users" className="text-xs gap-1.5">
             <Users className="h-3.5 w-3.5" /> Users
@@ -1115,6 +1601,9 @@ export default function AdminPage() {
 
         <TabsContent value="dashboard" className="mt-6">
           <DashboardTab authHeader={authHeader!} />
+        </TabsContent>
+        <TabsContent value="products" className="mt-6">
+          <ProductsTab />
         </TabsContent>
         <TabsContent value="users" className="mt-6">
           <UsersTab authHeader={authHeader!} />
